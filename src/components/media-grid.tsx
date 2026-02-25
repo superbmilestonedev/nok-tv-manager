@@ -82,7 +82,7 @@ export function MediaGrid({
           onDragOver={(e) => handleDragOver(e, index)}
           onDragEnd={handleDragEnd}
           className={cn(
-            "group relative aspect-square rounded-lg border border-border/50 bg-card overflow-hidden cursor-pointer transition-all",
+            "group relative rounded-lg border border-border/50 bg-card overflow-hidden cursor-pointer transition-all",
             "hover:border-primary/50 hover:shadow-md",
             overIndex === index &&
               dragIndex !== null &&
@@ -91,76 +91,89 @@ export function MediaGrid({
           onClick={() => onPreview(index)}
         >
           {/* Thumbnail */}
-          {item.downloadUrl ? (
-            item.type === "image" ? (
-              <img
-                src={item.thumbnailUrl || item.downloadUrl}
-                alt={item.originalName}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
+          <div className="relative aspect-square">
+            {item.downloadUrl ? (
+              item.type === "image" ? (
+                <img
+                  src={item.thumbnailUrl || item.downloadUrl}
+                  alt={item.originalName}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <video
+                  src={`${item.downloadUrl}#t=1`}
+                  preload="metadata"
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              )
             ) : (
               <div className="w-full h-full bg-secondary flex items-center justify-center">
-                <Play className="w-8 h-8 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">No preview</span>
               </div>
-            )
-          ) : (
-            <div className="w-full h-full bg-secondary flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">No preview</span>
-            </div>
-          )}
+            )}
 
-          {/* Video badge */}
-          {item.type === "video" && (
+            {/* Video badge */}
+            {item.type === "video" && (
+              <Badge
+                variant="secondary"
+                className="absolute top-1.5 left-1.5 text-[10px] py-0 px-1.5 bg-black/60 text-white border-0"
+              >
+                <Play className="w-2.5 h-2.5 mr-0.5 fill-current" />
+                Video
+              </Badge>
+            )}
+
+            {/* Order badge */}
             <Badge
               variant="secondary"
-              className="absolute top-1.5 left-1.5 text-[10px] py-0 px-1.5 bg-black/60 text-white border-0"
+              className="absolute bottom-1.5 left-1.5 text-[10px] py-0 px-1.5 bg-black/60 text-white border-0 font-mono"
             >
-              <Play className="w-2.5 h-2.5 mr-0.5 fill-current" />
-              Video
+              {index + 1}
             </Badge>
-          )}
 
-          {/* Order badge */}
-          <Badge
-            variant="secondary"
-            className="absolute bottom-1.5 left-1.5 text-[10px] py-0 px-1.5 bg-black/60 text-white border-0 font-mono"
-          >
-            {index + 1}
-          </Badge>
-
-          {/* Drag handle + menu */}
-          <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div
-              className="w-6 h-6 flex items-center justify-center rounded bg-black/60 text-white cursor-grab active:cursor-grabbing"
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <GripVertical className="w-3.5 h-3.5" />
+            {/* Drag handle + menu */}
+            <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div
+                className="w-6 h-6 flex items-center justify-center rounded bg-black/60 text-white cursor-grab active:cursor-grabbing"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <GripVertical className="w-3.5 h-3.5" />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-6 h-6 bg-black/60 text-white hover:bg-black/80 hover:text-white"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="w-3.5 h-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(item.id);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-6 h-6 bg-black/60 text-white hover:bg-black/80 hover:text-white"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="w-3.5 h-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item.id);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          </div>
+
+          {/* Filename */}
+          <div className="px-2 py-1.5">
+            <p className="text-[11px] text-muted-foreground truncate leading-tight" title={item.originalName}>
+              {item.originalName}
+            </p>
           </div>
         </div>
       ))}

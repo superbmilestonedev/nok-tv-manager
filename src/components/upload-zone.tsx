@@ -2,16 +2,25 @@
 
 import { useState, useRef, useCallback, type DragEvent } from "react";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload } from "lucide-react";
+import { useUpload } from "./upload-provider";
 
 interface UploadZoneProps {
-  onUpload: (files: FileList | File[]) => void;
-  uploading: boolean;
+  folderId: number;
+  folderName: string;
+  folderEmoji: string;
+  onUploadComplete: () => void;
 }
 
-export function UploadZone({ onUpload, uploading }: UploadZoneProps) {
+export function UploadZone({
+  folderId,
+  folderName,
+  folderEmoji,
+  onUploadComplete,
+}: UploadZoneProps) {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { addFiles } = useUpload();
 
   const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault();
@@ -28,10 +37,10 @@ export function UploadZone({ onUpload, uploading }: UploadZoneProps) {
       e.preventDefault();
       setDragOver(false);
       if (e.dataTransfer.files.length > 0) {
-        onUpload(e.dataTransfer.files);
+        addFiles(folderId, folderName, folderEmoji, e.dataTransfer.files, onUploadComplete);
       }
     },
-    [onUpload]
+    [folderId, folderName, folderEmoji, addFiles, onUploadComplete]
   );
 
   return (
@@ -39,13 +48,12 @@ export function UploadZone({ onUpload, uploading }: UploadZoneProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={() => !uploading && inputRef.current?.click()}
+      onClick={() => inputRef.current?.click()}
       className={cn(
-        "border-2 border-dashed rounded-xl p-16 text-center cursor-pointer transition-all",
+        "relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 overflow-hidden",
         dragOver
-          ? "border-primary bg-primary/5 scale-[1.01]"
-          : "border-muted-foreground/30 hover:border-muted-foreground/60",
-        uploading && "opacity-60 cursor-not-allowed"
+          ? "border-primary bg-primary/10 scale-[1.01]"
+          : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/[0.03]"
       )}
     >
       <input
@@ -56,36 +64,42 @@ export function UploadZone({ onUpload, uploading }: UploadZoneProps) {
         className="hidden"
         onChange={(e) => {
           if (e.target.files?.length) {
-            onUpload(e.target.files);
+            addFiles(folderId, folderName, folderEmoji, e.target.files, onUploadComplete);
             e.target.value = "";
           }
         }}
-        disabled={uploading}
       />
 
-      {uploading ? (
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Uploading...</p>
+      <div className="flex flex-col items-center gap-4">
+        {/* Icon */}
+        <div
+          className={cn(
+            "w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300",
+            dragOver
+              ? "bg-primary/20 text-primary scale-110"
+              : "bg-primary/15 text-primary"
+          )}
+        >
+          <Upload className="w-7 h-7" />
         </div>
-      ) : (
-        <div className="flex flex-col items-center gap-3">
-          <Upload
-            className={cn(
-              "w-14 h-14 transition-colors",
-              dragOver ? "text-primary" : "text-muted-foreground"
-            )}
-          />
-          <div>
-            <p className="text-lg font-medium">
-              {dragOver ? "Drop files here" : "Drag & drop files here"}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              or click to browse — images (JPG, PNG, GIF, WebP) and videos (MP4, MOV, MKV)
-            </p>
-          </div>
+
+        {/* Text */}
+        <div>
+          <p className="text-base font-semibold">
+            {dragOver ? "Drop files here" : "Drop files here, or click to upload"}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            Images (JPG, PNG, GIF, WebP) and videos (MP4, MOV, MKV)
+          </p>
         </div>
-      )}
+
+        {/* Specs */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground/70">
+          <span>1920 x 1080 (landscape) or 1080 x 1920 (portrait)</span>
+          <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+          <span>100 MB max per file</span>
+        </div>
+      </div>
     </div>
   );
 }

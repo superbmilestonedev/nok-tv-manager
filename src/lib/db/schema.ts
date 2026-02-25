@@ -18,6 +18,7 @@ export const folders = sqliteTable("folders", {
   pinHash: text("pin_hash").notNull().default(""), // hashed 4-digit exit PIN
   pinPlain: text("pin_plain").notNull().default("0000"), // stored for admin display
   sortOrder: integer("sort_order").notNull().default(0),
+  rotation: integer("rotation").notNull().default(0), // 0 = horizontal, 90 = vertical left, 270 = vertical right
   isExcluded: integer("is_excluded", { mode: "boolean" })
     .notNull()
     .default(false),

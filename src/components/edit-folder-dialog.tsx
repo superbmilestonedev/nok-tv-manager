@@ -13,12 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { EmojiPicker } from "@/components/emoji-picker";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, Monitor, Smartphone } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FolderData {
   id: number;
   name: string;
   emoji: string;
+  rotation: number;
   isExcluded: boolean;
   pinPlain: string;
 }
@@ -39,6 +41,7 @@ export function EditFolderDialog({
   const [name, setName] = useState(folder.name);
   const [emoji, setEmoji] = useState(folder.emoji);
   const [pin, setPin] = useState(folder.pinPlain);
+  const [rotation, setRotation] = useState(folder.rotation ?? 0);
   const [isExcluded, setIsExcluded] = useState(folder.isExcluded);
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
@@ -50,7 +53,7 @@ export function EditFolderDialog({
       setError("");
 
       if (!name.trim()) {
-        setError("Folder name can't be empty.");
+        setError("Display name can't be empty.");
         return;
       }
       if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
@@ -64,6 +67,7 @@ export function EditFolderDialog({
         if (name.trim() !== folder.name) updates.name = name.trim();
         if (emoji !== folder.emoji) updates.emoji = emoji;
         if (isExcluded !== folder.isExcluded) updates.isExcluded = isExcluded;
+        if (rotation !== (folder.rotation ?? 0)) updates.rotation = rotation;
         if (pin !== folder.pinPlain) updates.pin = pin;
 
         if (Object.keys(updates).length === 0) {
@@ -79,7 +83,7 @@ export function EditFolderDialog({
 
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error || "Couldn't update folder.");
+          setError(data.error || "Couldn't update display.");
           return;
         }
 
@@ -90,14 +94,14 @@ export function EditFolderDialog({
         setLoading(false);
       }
     },
-    [name, emoji, pin, isExcluded, folder, onUpdated]
+    [name, emoji, pin, rotation, isExcluded, folder, onUpdated]
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Folder</DialogTitle>
+          <DialogTitle>Edit Display</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
@@ -162,12 +166,46 @@ export function EditFolderDialog({
 
             <Separator />
 
+            {/* Orientation */}
+            <div className="space-y-2">
+              <Label>Content Orientation</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={rotation === 0 ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setRotation(0)}
+                  disabled={loading}
+                >
+                  <Monitor className="w-3 h-3 mr-1.5" />
+                  Horizontal
+                </Button>
+                <Button
+                  type="button"
+                  variant={rotation !== 0 ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setRotation(90)}
+                  disabled={loading}
+                >
+                  <Smartphone className="w-3 h-3 mr-1.5" />
+                  Vertical
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                What kind of content is in this folder — landscape or portrait videos/images.
+              </p>
+            </div>
+
+            <Separator />
+
             {/* Visibility */}
             <div className="flex items-center justify-between">
               <div>
                 <Label>Hide from TVs</Label>
                 <p className="text-xs text-muted-foreground">
-                  Hidden folders won't show on Android TV devices.
+                  Hidden displays won't show on Android TV devices.
                 </p>
               </div>
               <Button

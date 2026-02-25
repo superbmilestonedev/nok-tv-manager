@@ -29,6 +29,8 @@ import {
   Copy,
   Check,
   AlertTriangle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,7 +47,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-  const [resetUser, setResetUser] = useState<User | null>(null);
+  const [pinUser, setPinUser] = useState<User | null>(null);
   const [newPin, setNewPin] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -54,6 +56,12 @@ export default function UsersPage() {
   const [newEmail, setNewEmail] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Change PIN form
+  const [customPin, setCustomPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [pinError, setPinError] = useState("");
+  const [pinLoading, setPinLoading] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -99,6 +107,7 @@ export default function UsersPage() {
       setNewPin(data.generatedPin);
       setNewUsername("");
       setNewEmail("");
+      setCreateOpen(false);
       fetchUsers();
     } catch {
       setFormError("Can't connect. Check your internet.");
@@ -129,28 +138,45 @@ export default function UsersPage() {
     }
   }, [deleteUser, fetchUsers]);
 
-  const handleResetPin = useCallback(async () => {
-    if (!resetUser) return;
-    setFormLoading(true);
+  const handleChangePin = useCallback(async () => {
+    if (!pinUser) return;
+    setPinError("");
+
+    if (!customPin) {
+      setPinError("Enter a PIN.");
+      return;
+    }
+    if (customPin.length !== 6) {
+      setPinError("PIN must be exactly 6 digits.");
+      return;
+    }
+    if (!/^\d+$/.test(customPin)) {
+      setPinError("PIN must be numbers only.");
+      return;
+    }
+
+    setPinLoading(true);
     try {
-      const res = await fetch(`/api/users/${resetUser.id}`, {
+      const res = await fetch(`/api/users/${pinUser.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resetPin: true }),
+        body: JSON.stringify({ pin: customPin }),
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Couldn't reset PIN.");
+        setPinError(data.error || "Couldn't change PIN.");
         return;
       }
-      setNewPin(data.newPin);
-      setResetUser(null);
+      toast.success(`PIN updated for ${pinUser.username}.`);
+      setPinUser(null);
+      setCustomPin("");
+      setShowPin(false);
     } catch {
-      toast.error("Couldn't reset PIN.");
+      setPinError("Can't connect. Check your internet.");
     } finally {
-      setFormLoading(false);
+      setPinLoading(false);
     }
-  }, [resetUser]);
+  }, [pinUser, customPin]);
 
   const copyPin = useCallback(() => {
     if (newPin) {
@@ -195,7 +221,7 @@ export default function UsersPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.username}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.email || "—"}
+                    {user.email || "\u2014"}
                   </TableCell>
                   <TableCell>
                     {user.isAdmin ? (
@@ -213,10 +239,15 @@ export default function UsersPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setResetUser(user)}
+                        onClick={() => {
+                          setPinUser(user);
+                          setCustomPin("");
+                          setPinError("");
+                          setShowPin(false);
+                        }}
                       >
                         <KeyRound className="w-3.5 h-3.5 mr-1.5" />
-                        Reset PIN
+                        Change PIN
                       </Button>
                       <Button
                         variant="ghost"
@@ -293,7 +324,7 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* PIN Display Dialog */}
+      {/* PIN Display Dialog (after creating user) */}
       <Dialog
         open={!!newPin}
         onOpenChange={(open) => {
@@ -361,28 +392,76 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Reset PIN Confirmation */}
+      {/* Change PIN Dialog */}
       <Dialog
-        open={!!resetUser}
-        onOpenChange={(open) => !open && setResetUser(null)}
+        open={!!pinUser}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPinUser(null);
+            setCustomPin("");
+            setPinError("");
+            setShowPin(false);
+          }
+        }}
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Reset PIN</DialogTitle>
+            <DialogTitle>Change PIN</DialogTitle>
             <DialogDescription>
-              Generate a new PIN for <strong>{resetUser?.username}</strong>?
-              Their current PIN will stop working.
+              Set a new login PIN for <strong>{pinUser?.username}</strong>.
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-3 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="custom-pin">New PIN</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="custom-pin"
+                  type={showPin ? "text" : "password"}
+                  value={customPin}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setCustomPin(v);
+                    setPinError("");
+                  }}
+                  placeholder="Enter 6-digit PIN"
+                  inputMode="numeric"
+                  autoFocus
+                  className="font-mono tracking-widest"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowPin(!showPin)}
+                >
+                  {showPin ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Must be exactly 6 digits. Their current PIN will stop working.
+              </p>
+            </div>
+            {pinError && (
+              <p className="text-sm text-destructive">{pinError}</p>
+            )}
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setResetUser(null)}>
+            <Button variant="outline" onClick={() => setPinUser(null)}>
               Cancel
             </Button>
-            <Button onClick={handleResetPin} disabled={formLoading}>
-              {formLoading ? (
+            <Button
+              onClick={handleChangePin}
+              disabled={pinLoading || !customPin}
+            >
+              {pinLoading ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : null}
-              Reset PIN
+              Save PIN
             </Button>
           </DialogFooter>
         </DialogContent>

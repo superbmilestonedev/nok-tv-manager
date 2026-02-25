@@ -28,7 +28,7 @@ export default function DashboardPage() {
       const data = await res.json();
       setFolders(data);
     } catch {
-      toast.error("Couldn't load folders. Check your internet and try again.");
+      toast.error("Couldn't load displays. Check your internet and try again.");
     } finally {
       setLoading(false);
     }
@@ -46,19 +46,19 @@ export default function DashboardPage() {
   const handleCreated = useCallback(() => {
     setCreateOpen(false);
     fetchFolders();
-    toast.success("Folder created.");
+    toast.success("Display created.");
   }, [fetchFolders]);
 
   const handleUpdated = useCallback(() => {
     setEditFolder(null);
     fetchFolders();
-    toast.success("Folder updated.");
+    toast.success("Display updated.");
   }, [fetchFolders]);
 
   const handleDeleted = useCallback(() => {
     setDeleteFolder(null);
     fetchFolders();
-    toast.success("Folder deleted.");
+    toast.success("Display deleted.");
   }, [fetchFolders]);
 
   return (
@@ -68,7 +68,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold">{brand.name} {brand.tagline}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {folders.length} folder{folders.length !== 1 ? "s" : ""}
+            {folders.length} display{folders.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex gap-2">
@@ -85,7 +85,7 @@ export default function DashboardPage() {
           {isAdmin && (
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              New Folder
+              New Display
             </Button>
           )}
         </div>
@@ -97,21 +97,27 @@ export default function DashboardPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-square rounded-xl bg-card animate-pulse border border-border/50"
-            />
+              className="rounded-2xl bg-card animate-pulse border border-border/50"
+            >
+              <div className="flex flex-col items-center gap-3 px-4 pt-6 pb-5">
+                <div className="w-12 h-12 rounded-full bg-muted" />
+                <div className="w-20 h-4 rounded bg-muted" />
+                <div className="w-16 h-5 rounded-full bg-muted" />
+              </div>
+            </div>
           ))}
         </div>
       ) : folders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="text-6xl mb-4">{brand.defaultEmoji}</div>
-          <h2 className="text-lg font-semibold mb-2">No folders yet</h2>
+          <h2 className="text-lg font-semibold mb-2">No displays yet</h2>
           <p className="text-muted-foreground mb-4 max-w-sm">
-            Create your first folder to start organizing media for your displays.
+            Create your first display to start organizing media for your TVs.
           </p>
           {isAdmin && (
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Create Folder
+              Create Display
             </Button>
           )}
         </div>

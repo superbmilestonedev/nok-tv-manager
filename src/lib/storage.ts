@@ -19,10 +19,36 @@ export async function uploadFile(
 
   await file.save(buffer, {
     metadata: { contentType },
-    resumable: false,
+    resumable: buffer.length > 5 * 1024 * 1024, // resumable for files > 5MB
   });
 
   return { storagePath, checksum };
+}
+
+export async function createSignedUploadUrl(
+  folderId: number,
+  filename: string,
+  contentType: string
+): Promise<{ signedUrl: string; storagePath: string }> {
+  const bucket = getStorageBucket();
+  const storagePath = `${MEDIA_PREFIX}/${folderId}/${filename}`;
+  const file = bucket.file(storagePath);
+
+  const [signedUrl] = await file.getSignedUrl({
+    action: "write",
+    expires: Date.now() + 30 * 60 * 1000, // 30 minutes
+    contentType,
+    version: "v4",
+  });
+
+  return { signedUrl, storagePath };
+}
+
+export async function verifyFileExists(storagePath: string): Promise<boolean> {
+  const bucket = getStorageBucket();
+  const file = bucket.file(storagePath);
+  const [exists] = await file.exists();
+  return exists;
 }
 
 export async function uploadThumbnail(
@@ -40,6 +66,13 @@ export async function uploadThumbnail(
   });
 
   return thumbPath;
+}
+
+export async function downloadFileBuffer(storagePath: string): Promise<Buffer> {
+  const bucket = getStorageBucket();
+  const file = bucket.file(storagePath);
+  const [buffer] = await file.download();
+  return buffer as Buffer;
 }
 
 export async function getDownloadUrl(storagePath: string): Promise<string> {

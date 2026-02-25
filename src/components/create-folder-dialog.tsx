@@ -34,7 +34,7 @@ export function CreateFolderDialog({
       setError("");
 
       if (!name.trim()) {
-        setError("Enter a folder name.");
+        setError("Enter a display name.");
         return;
       }
 
@@ -48,7 +48,7 @@ export function CreateFolderDialog({
 
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error || "Couldn't create folder.");
+          setError(data.error || "Couldn't create display.");
           return;
         }
 
@@ -67,12 +67,12 @@ export function CreateFolderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Folder</DialogTitle>
+          <DialogTitle>Create Display</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-3 py-4">
             <div className="space-y-2">
-              <Label htmlFor="folder-name">Folder Name</Label>
+              <Label htmlFor="folder-name">Display Name</Label>
               <Input
                 id="folder-name"
                 value={name}

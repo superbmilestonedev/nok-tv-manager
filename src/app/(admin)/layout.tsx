@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UploadProvider } from "@/components/upload-provider";
 
 interface SessionUser {
   userId: number;
@@ -26,7 +27,7 @@ interface SessionUser {
 }
 
 const navItems = [
-  { href: "/", label: "Folders", icon: Tv },
+  { href: "/", label: "Displays", icon: Tv },
   { href: "/users", label: "Users", icon: Users, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -63,6 +64,7 @@ export default function AdminLayout({
   );
 
   return (
+    <UploadProvider>
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside className="w-16 border-r border-border/50 bg-sidebar flex flex-col items-center py-4 gap-1 shrink-0">
@@ -142,5 +144,6 @@ export default function AdminLayout({
       {/* Main content */}
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
+    </UploadProvider>
   );
 }

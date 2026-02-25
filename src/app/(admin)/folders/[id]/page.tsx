@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MediaGrid } from "@/components/media-grid";
 import { UploadZone } from "@/components/upload-zone";
 import { MediaPreview } from "@/components/media-preview";
 import { EditFolderDialog } from "@/components/edit-folder-dialog";
-import { ArrowLeft, Upload, RefreshCw, Settings } from "lucide-react";
+import { ArrowLeft, RefreshCw, Settings } from "lucide-react";
 import { toast } from "sonner";
 import type { MediaItem, FolderWithCount } from "@/lib/types";
 
@@ -19,10 +19,8 @@ export default function FolderMediaPage() {
   const [folder, setFolder] = useState<FolderWithCount | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchMedia = useCallback(async () => {
     try {
@@ -51,46 +49,6 @@ export default function FolderMediaPage() {
   useEffect(() => {
     fetchMedia();
   }, [fetchMedia]);
-
-  const handleUpload = useCallback(
-    async (files: FileList | File[]) => {
-      setUploading(true);
-      const formData = new FormData();
-      for (const file of Array.from(files)) {
-        formData.append("files", file);
-      }
-
-      try {
-        const res = await fetch(`/api/folders/${folderId}/media`, {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-
-        if (data.succeeded > 0) {
-          toast.success(
-            `${data.succeeded} file${data.succeeded !== 1 ? "s" : ""} uploaded.`
-          );
-        }
-
-        if (data.errors?.length > 0) {
-          for (const err of data.errors) {
-            toast.error(`${err.name}: ${err.error}`);
-          }
-        }
-
-        await fetchMedia();
-      } catch {
-        toast.error(
-          "Upload failed. Check your internet and try again."
-        );
-      } finally {
-        setUploading(false);
-      }
-    },
-    [folderId, fetchMedia]
-  );
 
   const handleDelete = useCallback(
     async (mediaId: number) => {
@@ -183,27 +141,18 @@ export default function FolderMediaPage() {
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
-          <Button onClick={() => fileInputRef.current?.click()}>
-            <Upload className="w-4 h-4 mr-2" />
-            Upload
-          </Button>
         </div>
       </div>
 
-      {/* Hidden file input for button upload */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/*,video/*"
-        className="hidden"
-        onChange={(e) => {
-          if (e.target.files?.length) {
-            handleUpload(e.target.files);
-            e.target.value = "";
-          }
-        }}
-      />
+      {/* Upload zone — always visible */}
+      <div className="mb-6">
+        <UploadZone
+          folderId={folderId}
+          folderName={folder?.name ?? ""}
+          folderEmoji={folder?.emoji ?? "📁"}
+          onUploadComplete={fetchMedia}
+        />
+      </div>
 
       {/* Media grid */}
       {loading ? (
@@ -211,22 +160,23 @@ export default function FolderMediaPage() {
           {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-square rounded-lg bg-card animate-pulse border border-border/50"
-            />
+              className="rounded-lg bg-card animate-pulse border border-border/50 overflow-hidden"
+            >
+              <div className="aspect-square bg-muted/50" />
+              <div className="px-2 py-1.5">
+                <div className="h-3 w-3/4 rounded bg-muted/50" />
+              </div>
+            </div>
           ))}
         </div>
-      ) : items.length === 0 ? (
-        <div className="py-8">
-          <UploadZone onUpload={handleUpload} uploading={uploading} />
-        </div>
-      ) : (
+      ) : items.length > 0 ? (
         <MediaGrid
           items={items}
           onReorder={handleReorder}
           onPreview={(index) => setPreviewIndex(index)}
           onDelete={handleDelete}
         />
-      )}
+      ) : null}
 
       {/* Preview modal */}
       {previewIndex !== null && items.length > 0 && (

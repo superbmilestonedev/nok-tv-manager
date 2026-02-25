@@ -57,7 +57,11 @@ export async function PATCH(
       updates.email = parsed.data.email;
     }
 
-    if (parsed.data.resetPin) {
+    if (parsed.data.pin) {
+      // Set custom PIN
+      newPin = parsed.data.pin;
+      updates.pinHash = await hash(newPin, 10);
+    } else if (parsed.data.resetPin) {
       // Generate new sequential PIN
       const countResult = await db
         .select({ count: sql<number>`count(*)` })

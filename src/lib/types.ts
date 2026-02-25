@@ -21,6 +21,7 @@ export interface FolderWithCount {
   name: string;
   emoji: string;
   sortOrder: number;
+  rotation: number;
   isExcluded: boolean;
   version: number;
   pinPlain: string;

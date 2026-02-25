@@ -64,6 +64,10 @@ export async function PATCH(
       updates.pinPlain = parsed.data.pin;
     }
 
+    if (parsed.data.rotation !== undefined) {
+      updates.rotation = parsed.data.rotation;
+    }
+
     if (parsed.data.isExcluded !== undefined) {
       updates.isExcluded = parsed.data.isExcluded;
     }

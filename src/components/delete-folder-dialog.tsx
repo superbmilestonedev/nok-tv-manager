@@ -39,7 +39,7 @@ export function DeleteFolderDialog({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Couldn't delete folder.");
+        setError(data.error || "Couldn't delete display.");
         return;
       }
 
@@ -57,7 +57,7 @@ export function DeleteFolderDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-destructive" />
-            Delete Folder
+            Delete Display
           </DialogTitle>
           <DialogDescription>
             This will permanently delete <strong>{folder.emoji} {folder.name}</strong>
@@ -95,7 +95,7 @@ export function DeleteFolderDialog({
                 Deleting...
               </>
             ) : (
-              "Delete Folder"
+              "Delete Display"
             )}
           </Button>
         </DialogFooter>

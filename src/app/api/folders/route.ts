@@ -19,6 +19,7 @@ export async function GET() {
         name: folders.name,
         emoji: folders.emoji,
         sortOrder: folders.sortOrder,
+        rotation: folders.rotation,
         isExcluded: folders.isExcluded,
         version: folders.version,
         pinPlain: folders.pinPlain,

@@ -14,6 +14,7 @@ export async function GET() {
         name: folders.name,
         emoji: folders.emoji,
         sortOrder: folders.sortOrder,
+        rotation: folders.rotation,
         version: folders.version,
         fileCount: sql<number>`count(${media.id})`.as("file_count"),
       })

@@ -66,9 +66,6 @@ export function MediaPreview({
           <span className="text-sm text-white/70 font-mono">
             {currentIndex + 1} of {items.length}
           </span>
-          <span className="text-sm text-white/50 truncate max-w-xs">
-            {current.originalName}
-          </span>
         </div>
         <div className="flex items-center gap-1">
           {current.downloadUrl && (
@@ -168,6 +165,13 @@ export function MediaPreview({
             <ChevronRight className="w-8 h-8" />
           </Button>
         )}
+      </div>
+
+      {/* Bottom bar — filename */}
+      <div className="shrink-0 px-4 py-3 text-center">
+        <p className="text-sm text-white/80 truncate" title={current.originalName}>
+          {current.originalName}
+        </p>
       </div>
     </div>
   );

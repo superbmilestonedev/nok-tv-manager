@@ -5,6 +5,7 @@ import { folders, media } from "@/lib/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { uploadFile, uploadThumbnail, getDownloadUrl } from "@/lib/storage";
 import crypto from "crypto";
+import sharp from "sharp";
 
 export const dynamic = "force-dynamic";
 
@@ -145,13 +146,15 @@ export async function POST(
           file.type
         );
 
-        // Generate thumbnail for images (basic — skip for video on free tier)
+        // Generate thumbnail for images
         let thumbnailPath: string | null = null;
         if (mediaType === "image") {
           try {
-            // For now, use the original as thumbnail (sharp can be added later)
-            // We'll store a small version if we add sharp
-            thumbnailPath = null; // TODO: sharp thumbnail generation
+            const thumbnailBuffer = await sharp(buffer)
+              .resize(400, 400, { fit: "inside", withoutEnlargement: true })
+              .webp({ quality: 80 })
+              .toBuffer();
+            thumbnailPath = await uploadThumbnail(folderId, filename, thumbnailBuffer);
           } catch {
             // Thumbnail generation failed, continue without
           }
