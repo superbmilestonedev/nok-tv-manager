@@ -99,10 +99,13 @@ export default function DashboardPage() {
               key={i}
               className="rounded-2xl bg-card animate-pulse border border-border/50"
             >
-              <div className="flex flex-col items-center gap-3 px-4 pt-6 pb-5">
-                <div className="w-12 h-12 rounded-full bg-muted" />
+              <div className="flex flex-col items-center gap-2 px-4 pt-5 pb-3">
+                <div className="w-10 h-10 rounded-full bg-muted" />
                 <div className="w-20 h-4 rounded bg-muted" />
-                <div className="w-16 h-5 rounded-full bg-muted" />
+                <div className="flex gap-1.5">
+                  <div className="w-16 h-5 rounded-full bg-muted" />
+                  <div className="w-20 h-5 rounded-full bg-muted" />
+                </div>
               </div>
             </div>
           ))}

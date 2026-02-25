@@ -36,11 +36,11 @@ export function FolderCard({
       onClick={onClick}
     >
       {/* Content */}
-      <div className="flex flex-col items-center justify-center px-4 pt-6 pb-5 gap-3">
+      <div className="flex flex-col items-center justify-center px-4 pt-5 pb-3 gap-2">
         {/* Emoji with subtle glow */}
         <div className="relative">
           <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <span className="relative text-5xl drop-shadow-sm">{folder.emoji}</span>
+          <span className="relative text-4xl drop-shadow-sm">{folder.emoji}</span>
         </div>
 
         {/* Name */}
@@ -49,12 +49,12 @@ export function FolderCard({
         </span>
 
         {/* File count + orientation pills */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2.5 py-1">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2 py-0.5">
             <FileImage className="w-3 h-3" />
             <span>{folder.fileCount} file{folder.fileCount !== 1 ? "s" : ""}</span>
           </div>
-          <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2 py-1">
+          <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2 py-0.5">
             {folder.rotation ? (
               <><Smartphone className="w-3 h-3" /><span>Vertical</span></>
             ) : (
