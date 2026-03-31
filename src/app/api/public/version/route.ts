@@ -9,9 +9,9 @@ export async function GET() {
     app: brand.name,
     version: "1.0.0",
     android: {
-      versionCode: 1,
-      versionName: "1.0.0",
-      apkUrl: null, // Set when APK is hosted
+      versionCode: 21,
+      versionName: "2.1.0",
+      apkUrl: "https://nok-web.vercel.app/nok-display.apk",
       minSdkVersion: 21,
     },
   });
